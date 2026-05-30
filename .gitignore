@@ -1,0 +1,15 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Avhengigheter
+node_modules/
+
+# Midlertidige filer
+*.tmp
+*.swp
