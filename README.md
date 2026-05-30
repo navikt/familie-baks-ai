@@ -21,7 +21,7 @@ Prefikset gjør det tydelig hva som kommer fra teamet vs. deg selv, og er det se
 ## Hva setup.sh gjør
 1. Sletter alle eksisterende `baks-*`-filer fra `~/.copilot` i undermapper `agents`, `skills` og `instructions`. 
 Dette sikrer at filer som er fjernet fra repoet ikke blir hengende igjen.
-2. **Symlinker** — oppretter symlinker fra `~/.copilot/` til filene i dette repoet.
+2. Oppretter symlinker fra `~/.copilot/` til filene i dette repoet.
 
 Scriptet er idempotent.
 
