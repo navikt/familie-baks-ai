@@ -1,6 +1,6 @@
 ---
 name: maven-kotlin-build
-description: Bruk når du kjører Maven-bygg (mvn) i dette prosjektet. Kotlin compiler daemon feiler med "cannot connect to registry: Operation not permitted" i dette miljøet. Legg alltid til -Dkotlin.compiler.daemon=false i alle mvn-kommandoer.
+description: 'Bruk når du kjører Maven-bygg (mvn) i dette prosjektet. Kotlin compiler daemon feiler med "cannot connect to registry: Operation not permitted" i dette miljøet. Legg alltid til -Dkotlin.compiler.daemon=false i alle mvn-kommandoer.'
 license: MIT
 metadata:
   domain: build

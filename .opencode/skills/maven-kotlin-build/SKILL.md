@@ -1,6 +1,6 @@
 ---
 name: maven-kotlin-build
-description: Use when running Maven builds (mvn) in this project. The Kotlin compiler daemon fails with "cannot connect to registry: Operation not permitted" in this environment. Always add -Dkotlin.compiler.daemon=false to all mvn commands.
+description: 'Use when running Maven builds (mvn) in this project. The Kotlin compiler daemon fails with "cannot connect to registry: Operation not permitted" in this environment. Always add -Dkotlin.compiler.daemon=false to all mvn commands.'
 ---
 
 # Maven Kotlin Build
