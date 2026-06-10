@@ -7,6 +7,10 @@ Only review files that are instructions to AI:
 - `.github/instructions/**`
 - `.github/agents/**`
 - `.github/skills/**`
+- `.opencode/AGENTS.md`
+- `.opencode/agents/**`
+- `.opencode/skills/**`
+- `.opencode/commands/**`
 
 Do **not** review human-facing documentation such as `README.md`, `kjøreregler.md`, or any other Markdown file outside the paths above.
 
