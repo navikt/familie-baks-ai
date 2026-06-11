@@ -6,79 +6,64 @@ Samlerepo for felles AI-konfigurasjon i Team BAKS.
 
 Per nå så kan AI-config kun settes på repo-nivå eller personlig nivå. 
 For å unngå unødvendig duplisering og vedlikehold putter vi all felles konfigurasjon her.
-Dette blir løst med litt triksing med symlinking og scripting. 
-I praksis så "putter" vi alle relevante filer i dette repo inn i  `~/.copilot/`-mappen.
-Se diagram nederst for mer oversikt.
+Med litt triksing tar vi det som ligger i dette repo og setter det personlig nivå.
 
-Personlige filer i `~/.copilot/` blir aldri overskrevet, med unntak av `copilot-instruction.md` (inntil videre).
-Konfigurasjon på repo-nivå vil alltid ha prioritet over personlige konfigurasjon.
+Repoet støtter to verktøy: **Copilot CLI** og **OpenCode**. Se [copilot-vs-opencode.md](./copilot-vs-opencode.md) for detaljer.
+
+Tanken bak er at vi har domene-spesifikk informasjon per repo med: `AGENTS.md`. 
+Capabilities (agents/skills/instructions/commands) har vi i dette repo. Her må vi bare teste oss frem litt om hva som funker.
+
+## Kom i gang
+
+### Copilot CLI
+
+```bash
+./setup-copilot.sh
+```
+
+#### Hva setup-copilot.sh gjør
+
+1. Sletter alle eksisterende `baks-*`-filer fra `~/.copilot` i undermappene `agents`, `skills` og `instructions`.
+   Dette sikrer at filer som er fjernet fra repoet ikke blir hengende igjen.
+2. Oppretter symlinker fra `~/.copilot/` til filene i dette repoet.
+
+Kjør `setup-copilot.sh` én gang etter kloning, og etter at nye filer er lagt til i repoet:
+
+Scriptet er idempotent.
+
+### OpenCode
+
+```bash
+./setup-opencode.sh
+```
+
+#### Hva setup-opencode.sh gjør
+
+Sjekker at `OPENCODE_CONFIG_DIR` er satt og peker på `.opencode/`-mappen i dette repoet.
+Scriptet viser hva du må legge til i `~/.zshrc` hvis det mangler.
+
+`OPENCODE_CONFIG_DIR` forteller OpenCode at den skal laste `AGENTS.md`, skills, agenter og kommandoer derfra.
+
+Ingen re-kjøring nødvendig etter miljøvariabelen er satt — `git pull` er nok for å få nye endringer.
+
+Scriptet er idempotent.
+
+## Holde seg oppdatert
+
+Anbefaler å legge til følgende alias i `~/.zshrc` og kjøre jevnlig eller ved endringer i dette repo.
+
+```bash
+alias baks-ai-sync="git -C /path/til/familie-baks-ai pull && /path/til/familie-baks-ai/setup-copilot.sh"
+```
+
+Bytt ut `/path/til/familie-baks-ai` med faktisk sti til der du har klonet repoet.
 
 ## Navnekonvensjon
 
 All konfigurasjon i dette repoet skal ha prefiks `baks-`.
-Prefikset gjør det tydelig hva som kommer fra teamet vs. deg selv, og er det setup.sh bruker for å rydde opp.
-
-## Hva setup.sh gjør
-1. Sletter alle eksisterende `baks-*`-filer fra `~/.copilot` i undermapper `agents`, `skills` og `instructions`. 
-Dette sikrer at filer som er fjernet fra repoet ikke blir hengende igjen.
-2. Oppretter symlinker fra `~/.copilot/` til filene i dette repoet.
-
-Scriptet er idempotent.
+Prefikset gjør det tydelig hva som kommer fra teamet vs. deg selv, og er det `setup-copilot.sh` bruker for å rydde opp.
 
 ## TODO
-- Opprett alias for å synke nye endringer og rekjøre setup.
-- Støtte for at bruker kan ha sin egen copilot-instructions.md sidestilt med teamets.
-- Støtte for OpenCode. Sjekk nav-pilot sin konvertering.
-
-## Diagram
-
-```mermaid
-graph TD
-    subgraph baksai["familie-baks-ai/"]
-        BAKS_AGENT[baks.agent.md]
-        BAKS_SKILL[baks.skill.md]
-        BAKS_INSTR[baks.instructions.md]
-        BAKS_COPILOT_INSTR[copilot-instructions.md]
-    end
-
-    subgraph copilot["~/.copilot/"]
-        USER_AGENT[user.agent.md]
-        USER_SKILL[user.skill]
-        USER_INSTR[user.instructions.md]
-        COPILOT_INSTR[copilot-instructions.md]
-        BAKS_AGENT_SYM[baks.agent.md 🔗]
-        BAKS_SKILL_SYM[baks.skill.md 🔗]
-        BAKS_INSTR_SYM[baks.instructions.md 🔗]
-    end
-
-    subgraph basak["familie-ba-sak/"]
-        subgraph repo_local["Repo (Pri 1)"]
-            REPO_AGENT[repo.agent.md]
-            REPO_SKILL[repo.skill.md]
-            REPO_INSTR[repo.instructions.md]
-            REPO_AGENTSMD[AGENTS.md]
-        end
-        subgraph user_loaded["Bruker (Pri 2)"]
-            LOADED_USER_AGENT[user.agent.md]
-            LOADED_USER_SKILL[user.skill.md]
-            LOADED_USER_INSTR[user.instructions.md]
-            LOADED_COPILOT_INSTR[copilot-instructions.md]
-            LOADED_BAKS_AGENT[baks.agent.md]
-            LOADED_BAKS_SKILL[baks.skill.md]
-            LOADED_BAKS_INSTR[baks.instructions.md]
-        end
-    end
-
-    BAKS_AGENT -. symlink .-> BAKS_AGENT_SYM
-    BAKS_SKILL -. symlink .-> BAKS_SKILL_SYM
-    BAKS_INSTR -. symlink .-> BAKS_INSTR_SYM
-    BAKS_COPILOT_INSTR -. symlink .-> COPILOT_INSTR
-
-    USER_AGENT --> LOADED_USER_AGENT
-    USER_SKILL --> LOADED_USER_SKILL
-    USER_INSTR --> LOADED_USER_INSTR
-    COPILOT_INSTR --> LOADED_COPILOT_INSTR
-    BAKS_AGENT_SYM --> LOADED_BAKS_AGENT
-    BAKS_SKILL_SYM --> LOADED_BAKS_SKILL
-    BAKS_INSTR_SYM --> LOADED_BAKS_INSTR
-```
+- Støtte for at bruker kan ha sin egen `copilot-instructions.md` sidestilt med teamets.
+- Oppsett MCP
+- Nav-pilot
