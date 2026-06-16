@@ -1,5 +1,5 @@
 ---
-name: spring-boot-best-practices
+name: baks-spring-boot-best-practices
 description: Spring Boot best practices for Kotlin — injection, transactions, proxy annotations, JPA entities, naming, and REST API design. Use when writing or reviewing Spring Boot code in Kotlin.
 license: MIT
 metadata:

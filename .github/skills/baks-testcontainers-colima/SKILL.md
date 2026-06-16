@@ -1,5 +1,5 @@
 ---
-name: testcontainers-colima
+name: baks-testcontainers-colima
 description: Bruk når du kjører tester med Maven (mvn test, mvn verify, mvn package, mvn install) eller andre JVM-verktøy på macOS med Colima/Docker Desktop. Konfigurerer automatisk Testcontainers til å koble til PostgreSQL-containere via Colimas Docker-socket.
 license: MIT
 metadata:
