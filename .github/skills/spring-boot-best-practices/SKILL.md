@@ -1,171 +1,171 @@
 ---
 name: spring-boot-best-practices
-description: Spring Boot beste praksiser for Kotlin — injeksjon, transaksjoner, proxy-annotasjoner, JPA-entiteter, navngivning, pakkestruktur og REST API-design. Bruk når du skriver eller gjennomgår Spring Boot-kode i Kotlin.
+description: Spring Boot best practices for Kotlin — injection, transactions, proxy annotations, JPA entities, naming, and REST API design. Use when writing or reviewing Spring Boot code in Kotlin.
 license: MIT
 metadata:
   domain: backend
   tags: spring-boot kotlin jpa rest transactions proxy logging naming
 ---
 
-# Spring Boot beste praksiser (Kotlin)
+# Spring Boot Best Practices (Kotlin)
 
-## Injeksjon
+## Injection
 
-**Bruk konstruktørinjeksjon, ikke feltinjeksjon.**
+**Use constructor injection, not field injection.**
 
 ```kotlin
-// Dårlig
+// Bad
 @Service
-class BetalingService {
+class PaymentService {
     @Autowired
-    lateinit var repository: BetalingRepository
+    lateinit var repository: PaymentRepository
 }
 
-// Bra
+// Good
 @Service
-class BetalingService(
-    private val repository: BetalingRepository,
+class PaymentService(
+    private val repository: PaymentRepository,
 )
 ```
 
-## Proxy-annotasjoner
+## Proxy Annotations
 
-**Proxy-annotasjoner (`@Transactional`, `@Cacheable`, `@CacheEvict`, `@CachePut`, `@Async`) skal ikke stå på private metoder** — Spring-proxyen kan ikke intercepte dem.
+**Proxy annotations (`@Transactional`, `@Cacheable`, `@CacheEvict`, `@CachePut`, `@Async`) must not be placed on private methods** — the Spring proxy cannot intercept them.
 
 ```kotlin
-// Dårlig
+// Bad
 @Service
-class FakturaService {
-    fun opprettFaktura() { lagreFaktura() }
+class InvoiceService {
+    fun createInvoice() { persistInvoice() }
 
     @Transactional
-    private fun lagreFaktura() { /* proxy intercepter aldri dette */ }
+    private fun persistInvoice() { /* proxy never intercepts this */ }
 }
 
-// Bra
+// Good
 @Service
-class FakturaService {
+class InvoiceService {
     @Transactional
-    fun opprettFaktura() { lagreFaktura() }
+    fun createInvoice() { persistInvoice() }
 
-    private fun lagreFaktura() { /* transaksjonen åpnes på public-metoden */ }
+    private fun persistInvoice() { /* transaction opened on the public method */ }
 }
 ```
 
-**Unngå selv-kall mellom proxy-annoterte metoder.** Kall fra `this` går utenom proxyen — inject en egen bean i stedet.
+**Avoid self-invocation between proxy-annotated methods.** Calls via `this` bypass the proxy — inject a separate bean instead.
 
 ```kotlin
-// Dårlig
+// Bad
 @Service
-class RapportService {
+class ReportService {
     @Transactional
-    fun generer(id: Long) { arkiver(id) } // @Async kjøres aldri
+    fun generate(id: Long) { archive(id) } // @Async never fires
 
     @Async
-    fun arkiver(id: Long) { }
+    fun archive(id: Long) { }
 }
 
-// Bra
+// Good
 @Service
-class RapportService(private val arkivService: ArkivService) {
+class ReportService(private val archiveService: ArchiveService) {
     @Transactional
-    fun generer(id: Long) { arkivService.arkiver(id) }
+    fun generate(id: Long) { archiveService.archive(id) }
 }
 
 @Service
-class ArkivService {
+class ArchiveService {
     @Async
-    fun arkiver(id: Long) { }
+    fun archive(id: Long) { }
 }
 ```
 
-## Konfigurasjon
+## Configuration
 
-**`@Configuration`-klasser skal ikke ha mutable state** (unntak: `@Value`- og `@ConfigurationProperties`-felt).
+**`@Configuration` classes must not hold mutable state** (exceptions: `@Value` and `@ConfigurationProperties` fields).
 
 ```kotlin
-// Dårlig
+// Bad
 @Configuration
-class EpostKonfigurasjon {
-    var forsøk = 0
-    @Bean fun epostKlient(): EpostKlient = EpostKlient()
+class MailConfiguration {
+    var retries = 0
+    @Bean fun mailClient(): MailClient = MailClient()
 }
 
-// Bra
+// Good
 @Configuration
-class EpostKonfigurasjon {
+class MailConfiguration {
     @Bean
-    fun epostKlient(properties: EpostProperties): EpostKlient =
-        EpostKlient(properties.host, properties.port)
+    fun mailClient(properties: MailProperties): MailClient =
+        MailClient(properties.host, properties.port)
 }
 ```
 
-**`@Bean`-metoder skal ligge i `@Configuration`-klasser**, ikke i `@Component`.
+**`@Bean` methods must live in `@Configuration` classes**, not in `@Component`.
 
-## Unntak
+## Exceptions
 
-**Egendefinerte unntak skal arve `RuntimeException`**, ikke `Exception`.
+**Custom exceptions must extend `RuntimeException`**, not `Exception`.
 
 ```kotlin
-// Dårlig
-class BetalingFeiletException(message: String) : Exception(message)
+// Bad
+class PaymentFailedException(message: String) : Exception(message)
 
-// Bra
-class BetalingFeiletException(message: String) : RuntimeException(message)
+// Good
+class PaymentFailedException(message: String) : RuntimeException(message)
 ```
 
 ## JPA
 
-**Kotlin `data class` skal ikke brukes som JPA-entiteter** — `data class` er `final` og hindrer lazy-loading-proxyer.
+**Kotlin `data class` must not be used as JPA entities** — `data class` is `final` and prevents lazy-loading proxies.
 
 ```kotlin
-// Dårlig
+// Bad
 @Entity
-data class BrukerEntitet(@Id val id: Long, val epost: String)
+data class UserEntity(@Id val id: Long, val email: String)
 
-// Bra
+// Good
 @Entity
-class BrukerEntitet(
+class UserEntity(
     @Id var id: Long? = null,
-    var epost: String,
+    var email: String,
 )
 ```
 
-**Alle `@Entity`-klasser må ha et `@Id`-felt.**
+**All `@Entity` classes must declare an `@Id` field.**
 
-**`@Transactional` hører hjemme i service-laget**, ikke i kontrollere.
+**`@Transactional` belongs in the service layer**, not in controllers.
 
-**Domain- og entity-pakker skal ikke importere `org.springframework.*`** — hold domenemodellen uavhengig av Spring.
+**Domain and entity packages must not import `org.springframework.*`** — keep the domain model independent of Spring.
 
-## Navngivning
+## Naming
 
-| Annotering | Suffiks |
+| Annotation | Suffix |
 |---|---|
 | `@Service` | `Service` |
 | `@Repository` | `Repository` |
 | `@Controller` / `@RestController` | `Controller` |
-| `@ControllerAdvice` / `@RestControllerAdvice` | `ExceptionHandler` eller `Advice` |
+| `@ControllerAdvice` / `@RestControllerAdvice` | `ExceptionHandler` or `Advice` |
 | `@ConfigurationProperties` | `Properties` |
 
 ## REST API
 
-**Bruk spesifikke HTTP-metode-annotasjoner** — ikke `@RequestMapping` der `@GetMapping`, `@PostMapping` o.l. passer.
+**Use specific HTTP method annotations** — avoid `@RequestMapping` where `@GetMapping`, `@PostMapping`, etc. apply.
 
-**Ingen trailing slash** på mapping-stier: `/brukere`, ikke `/brukere/`.
+**No trailing slash** on mapping paths: `/users`, not `/users/`.
 
-**`GET`-endepunkter skal returnere noe** — ikke `Unit`/`void`. Hvis det er en kommando, bruk `POST`.
+**`GET` endpoints must return something** — not `Unit`/`void`. If it is a command, use `POST`.
 
-**Ikke eksponér JPA-entiteter fra REST** — bruk egne DTO-er.
+**Do not expose JPA entities from REST** — use dedicated DTOs.
 
-**Kontrollere skal ikke injisere repositories direkte** — gå via service.
+**Controllers must not inject repositories directly** — go through a service.
 
 ```kotlin
-// Dårlig
+// Bad
 @RestController
-class BrukerController(private val brukerRepository: BrukerRepository)
+class UserController(private val userRepository: UserRepository)
 
-// Bra
+// Good
 @RestController
-class BrukerController(private val brukerService: BrukerService)
+class UserController(private val userService: UserService)
 ```
 
