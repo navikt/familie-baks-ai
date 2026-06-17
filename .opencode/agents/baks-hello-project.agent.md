@@ -1,6 +1,7 @@
 ---
+name: Baks Hello Project Agent
 description: Dummy agent – prints its own name
-model: anthropic/claude-haiku-4-5
+model: github-copilot/claude-haiku-4.5
 ---
 
 # Hello Agent
