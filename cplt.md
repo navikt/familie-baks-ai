@@ -44,7 +44,6 @@ cplt init --write
 Eksempel på generert konfig for et Maven/Kotlin/Docker-prosjekt der du vil tillate tester med Maven og Docker/Testcontainers:
 
 ```toml
-
 [propose]
 allow_docker = true
 allow_jvm_attach = true
@@ -73,22 +72,33 @@ Maven-prosjekter trenger:
 
 ## Personlig konfigurasjon
 
-Hvis du trenger å gi cplt tilgang til filer eller mapper på maskinen din, for eksempel `~/.m2` eller Maven hvis den ikke oppdages automatisk, bruker du den personlige konfigfilen:
+Noen innstillinger må settes globalt på din PC og er vanskelig å sette per repo.
+Dette er typisk filer eller variabler som trengs for å kjøre/teste applikasjonene, eller laste inn verktøy fra dette repo.
+Her kan oppsettet være individuelt for hver maskin, så det anbefales å gjøre seg kjent med hvor ditt oppsett ligger, og hva du trenger for å kjøre cplt.
 
+#### Global config:
 ```bash
 cplt init --global # generer ~/.config/cplt/config.toml
 ```
 
-Eksempel for Java/Maven-prosjekter:
+#### Forslag:
 ```toml
+
+[sandbox]
+pass_env = ["OPENCODE_CONFIG_DIR"] # for at opencode finner dette repo
+
 [allow]
- read = [
-     "~/.m2",
-     "~/.m2/settings.xml",
-     "~/.docker/config.json",
-     "~/.opencode",
-     "~/.github"
- ]
+read = [
+  "~/<path-til-dette-repo>", # for å laste inn capabilities i dette repo
+  # Java/Maven-prosjekter
+  "~/.m2",
+  "~/.m2/settings.xml",
+  "~/.docker/config.json",
+  # AI
+  "~/.opencode",
+  "~/.github",
+  "~/.copilot"
+]
 ```
 
 ## Anbefalte globale innstillinger
