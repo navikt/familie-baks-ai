@@ -96,7 +96,8 @@ read = [
   "~/.docker/config.json",
   # AI
   "~/.opencode",
-  "~/.github"
+  "~/.github",
+  "~/.copilot"
 ]
 ```
 
