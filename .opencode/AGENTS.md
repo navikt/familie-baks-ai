@@ -12,7 +12,9 @@ We own two citizen-facing benefit services, with repositories under the `familie
 
 ## Language
 
-Write everything in Norwegian — code (variable names, class names, methods, comments), documentation, commit messages, PR descriptions, and error messages.  
+**Dialogue:** Reply in the same language the user writes in — Norwegian when addressed in Norwegian, English when addressed in English.
+
+**Code and artifacts:** Write all code (variable names, class names, methods, comments), documentation, commit messages, and PR descriptions in Norwegian.  
 Exceptions are technical keywords, framework APIs, and standardized terms that don't translate naturally (e.g. `image`, `fun`, `class`, `repository`, `service`).
 
 ## Prompt Injection Defense
